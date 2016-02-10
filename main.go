@@ -1,14 +1,10 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"golang.org/x/text/encoding/japanese"
-	"golang.org/x/text/transform"
 	"io"
 	"io/ioutil"
-	"net/http"
 	"os/exec"
 	"path/filepath"
 	"regexp"
@@ -60,18 +56,11 @@ func loadJSONFile(fname string) (*Config, error) {
 	return &conf, nil
 }
 
-func getRawURL(url string) (string, error) {
-	r := regexp.MustCompile(`/(\d+)/(\d+)/$`)
-	if !r.MatchString(url) {
-		return "", fmt.Errorf("%s should be like ***/1234/5678/", url)
-	}
-	rawmodeURLFormat := "http://jbbs.shitaraba.net/bbs/rawmode.cgi/game/($1)/($2)"
-	return r.ReplaceAllString(url, rawmodeURLFormat), nil
-}
-
 /*
  * load config
  * make wav files
+ * p.cacheDir = "/home/user/.cache/gobou/bouSaga2.0"
+ * p.bbsURL = "http://jbbs.shitaraba.net/bbs/rawmode.cgi/game/57358/1389905050/"
  */
 func (p *Task) Configure(configFile string, e *error) error {
 	// load config file
@@ -81,7 +70,7 @@ func (p *Task) Configure(configFile string, e *error) error {
 		config["cache"] = "/home/your_user_name/.cache/gobou/bouSaga2.0"
 		config["url"] = "**Write your bbsURL**"
 		config["res"] = 500
-		v, _ := json.Marshal(config)
+		v, _ := json.MarshalIndent(config, "", "  ")
 		fmt.Println(configFile, "is not found")
 		fmt.Println(string(v))
 		*e = err
@@ -91,50 +80,43 @@ func (p *Task) Configure(configFile string, e *error) error {
 	// needs mkdir
 
 	p.cacheDir = conf.Cache
-	p.bbsURL = conf.Url
-	p.resNum = conf.Res
-	// p.cacheDir = "/home/user/.cache/gobou/bouSaga2.0"
-	// p.bbsURL = "http://jbbs.shitaraba.net/bbs/rawmode.cgi/game/57358/1389905050/"
-	// p.resNum = 500
-	p.url = p.bbsURL + strconv.Itoa(p.resNum) + "-"
+	p.bbsURL, err = GetRawURL(conf.Url)
+	p.MoveTo(conf.Res)
 
 	// voice
 	// fmt.Println(conf)
 	p.vinfo = makeVoiceInfo(p.cacheDir)
+	// add voice
 	for _, v := range conf.Voice {
 		p.vinfo.add(v)
 	}
-	//p.vinfo.addVoice("hello", "ぷええーーーー", "sta")
-	//p.vinfo.addVoice("hello2", "すたすた", "sta")
-	//p.vinfo.addVoice("tada", "ただの香車を", "タダ")
 	time.Sleep(500 * time.Millisecond)
 
-	return nil
+	return err
 }
 
+// Main task
 func (p *Task) Main(configFile string, e *error) error {
-	res, err := http.Get(p.url)
-	defer res.Body.Close()
+	data, err := ReadBBS(p.url)
 	if err != nil {
 		return err
 	}
 
-	arr, err2 := ioutil.ReadAll(res.Body)
-	if err2 != nil {
-		return err2
+	// find voice and  play the voice
+	for _, res := range data {
+		p.vinfo.playAllMatch(res.body, 5*time.Second)
+		fmt.Println(res.body)
 	}
-
-	data := string(arr)
-	in := bytes.NewBufferString(data)
-	out := new(bytes.Buffer)
-	reader := transform.NewReader(in, japanese.EUCJP.NewDecoder())
-	_, *e = io.Copy(out, reader)
-	fmt.Println(out)
-	// find voice
-	// play the voice
-	p.vinfo.playAllMatch(out.String(), 5*time.Second)
-	return *e
+	p.MoveTo(MaxID(data, p.resNum))
+	return nil
 }
+
+// MoveTo new url
+func (p *Task) MoveTo(n int) {
+	p.resNum = n
+	p.url = p.bbsURL + strconv.Itoa(n) + "-"
+}
+
 func (p *Task) SaveData(configFile string, e *error) error {
 	return nil
 }
@@ -262,17 +244,7 @@ func main() {
 	var err error
 	task.Configure("/home/user/.config/gobou/plugin_config/bouSaga2.0.json", &err)
 	fmt.Println(task)
-	//task.vinfo.playAll(1 * time.Second)
-	/*
-		task.vinfo.playAllMatch("starchoo", 1*time.Second)
-		time.Sleep(1 * time.Second)
-		task.vinfo.playAllMatch("タダやん", 1*time.Second)
-		time.Sleep(1 * time.Second)
-		task.vinfo.playOneMatch("starchoo")
-	*/
 	task.Main("CONFIG_FILE", &err)
-	//vinfo.play("hello")
-	//task.vinfo.playAll(1 * time.Second)
 	//pingo.Register(task)
 	//pingo.Run()
 }
