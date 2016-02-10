@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/dullgiulio/pingo"
 	"io"
 	"io/ioutil"
 	"os/exec"
@@ -107,7 +108,7 @@ func (p *Task) Main(configFile string, e *error) error {
 		p.vinfo.playAllMatch(res.body, 5*time.Second)
 		fmt.Println(res.body)
 	}
-	p.MoveTo(MaxID(data, p.resNum))
+	p.MoveTo(NextID(data, p.resNum))
 	return nil
 }
 
@@ -241,10 +242,10 @@ func (vinfo *VoiceInfo) playOneMatch(s string) {
 
 func main() {
 	task := &Task{}
-	var err error
-	task.Configure("/home/user/.config/gobou/plugin_config/bouSaga2.0.json", &err)
-	fmt.Println(task)
-	task.Main("CONFIG_FILE", &err)
-	//pingo.Register(task)
-	//pingo.Run()
+	//var err error
+	//task.Configure("/home/user/.config/gobou/plugin_config/bouSaga2.0.json", &err)
+	//fmt.Println(task)
+	//task.Main("CONFIG_FILE", &err)
+	pingo.Register(task)
+	pingo.Run()
 }

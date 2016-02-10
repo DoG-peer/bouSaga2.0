@@ -84,6 +84,17 @@ func MaxID(rs []Res, k int) int {
 	return n
 }
 
+// NextID returns maximum id or default id
+func NextID(rs []Res, k int) int {
+	n := k - 1
+	for _, r := range rs {
+		if n < r.id {
+			n = r.id
+		}
+	}
+	return n + 1
+}
+
 // GetRawURL convert usual thread url to raw url
 func GetRawURL(url string) (string, error) {
 	r := regexp.MustCompile(`^.*/(\d+)/(\d+)/$`)

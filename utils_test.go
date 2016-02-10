@@ -17,6 +17,19 @@ func TestSplitToRes(t *testing.T) {
 	}
 }
 
+func TestNextID(t *testing.T) {
+	data := []Res{
+		Res{id: 1, name: "名無しさん", email: "sage", date: "now", body: "hogehoge"},
+		Res{id: 2, name: "名無しさん", email: "sage", date: "now", body: "hogehoge"},
+		Res{id: 100, name: "名無しさん", email: "sage", date: "now", body: "hogehoge"},
+	}
+	value := NextID(data, 0)
+	expected := 101
+	if value != expected {
+		t.Fatalf("Expected %v, but %v:", expected, value)
+	}
+}
+
 func TestMaxID(t *testing.T) {
 	data := []Res{
 		Res{id: 1, name: "名無しさん", email: "sage", date: "now", body: "hogehoge"},
