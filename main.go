@@ -82,7 +82,7 @@ func (p *Task) SaveData(configFile string, e *error) error {
 
 // SaveConfig is loaded by gobou
 func (p *Task) SaveConfig(configFile string, e *error) error {
-	//p.config.Save(configFile)
+	p.config.Save(configFile)
 	return nil
 }
 
