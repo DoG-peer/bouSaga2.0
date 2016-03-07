@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/dullgiulio/pingo"
+	"log"
 	"time"
 )
 
@@ -47,10 +48,13 @@ func (p *Task) Configure(configFile string, e *error) error {
 	p.bbs.MoveTo(conf.Res)
 
 	// voice
-	p.voiceMng = makeVoiceManager(conf.Cache)
+	p.voiceMng = makeVoiceManager(conf.Cache, conf.Jtalk)
 	// add voice
 	for _, v := range conf.Voice {
-		p.voiceMng.add(v)
+		err := p.voiceMng.add(v)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 	time.Sleep(500 * time.Millisecond)
 
@@ -58,7 +62,7 @@ func (p *Task) Configure(configFile string, e *error) error {
 }
 
 // Main task
-func (p *Task) Main(configFile string, e *error) error {
+func (p *Task) Main(configFile string, s *string) error {
 	data, err := p.bbs.Read()
 	if err != nil {
 		return err
@@ -72,6 +76,11 @@ func (p *Task) Main(configFile string, e *error) error {
 	nextNum := NextID(data, p.bbs.num)
 	p.config.Res = nextNum
 	p.bbs.MoveTo(nextNum)
+	if len(data) != 0 {
+		*s = "レスがありました"
+	} else {
+		*s = ""
+	}
 	return nil
 }
 
@@ -88,19 +97,21 @@ func (p *Task) SaveConfig(configFile string, e *error) error {
 
 // Interval is loaded by gobou
 func (p *Task) Interval(a string, d *time.Duration) error {
-	*d = 30 * time.Second
+	*d = 15 * time.Second
 	return nil
 }
 
+/*
 // End is loaded by gobou
 func (p *Task) End() error {
 	return nil
 }
-
-func makeVoiceManager(dir string) VoiceManager {
+*/
+func makeVoiceManager(dir string, jtalk Jtalk) VoiceManager {
 	return VoiceManager{
 		voice: map[string]Voice{},
 		dir:   dir,
+		jtalk: jtalk,
 	}
 }
 

@@ -1,0 +1,16 @@
+{
+  "Jtalk": {
+    "Voice": "/usr/share/hts-voice/nitech-jp-atr503-m001/nitech_jp_atr503_m001.htsvoice",
+    "Dictionary": "/var/lib/mecab/dic/open-jtalk/naist-jdic"
+  },
+  "Cache": "/home/user/.cache/gobou/bouSaga2.0",
+  "Res": 545,
+  "URL": "http://jbbs.shitaraba.net/bbs/rawmode.cgi/game/57358/1389905050/",
+  "Voice": [
+    {"Name": "sata", "Words":"ぷえー", "Condition":"star"},
+    {"Name": "sata2", "Words":"ぷえーーーー", "Condition":"choo"},
+    {"Name": "tada", "Words":"ただの香車を", "Condition":"タダ"},
+    {"Name": "gobou", "Words":"ごぼう、かわいい", "Condition":"gobou"},
+    {"Name": "saga", "Words":"佐賀さん、はよ配信","Condition":"佐賀"}
+  ]
+}
