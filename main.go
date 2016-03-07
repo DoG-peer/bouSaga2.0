@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/dullgiulio/pingo"
+	"github.com/DoG-peer/gobou/utils"
 	"log"
 	"time"
 )
@@ -62,7 +62,7 @@ func (p *Task) Configure(configFile string, e *error) error {
 }
 
 // Main task
-func (p *Task) Main(configFile string, s *string) error {
+func (p *Task) Main(configFile string, s *[]gobou.Message) error {
 	data, err := p.bbs.Read()
 	if err != nil {
 		return err
@@ -77,9 +77,9 @@ func (p *Task) Main(configFile string, s *string) error {
 	p.config.Res = nextNum
 	p.bbs.MoveTo(nextNum)
 	if len(data) != 0 {
-		*s = "レスがありました"
+		*s = append(*s, gobou.Notify("レスがありました"))
 	} else {
-		*s = ""
+		*s = append(*s, gobou.Notify(""))
 	}
 	return nil
 }
@@ -116,7 +116,5 @@ func makeVoiceManager(dir string, jtalk Jtalk) VoiceManager {
 }
 
 func main() {
-	task := &Task{}
-	pingo.Register(task)
-	pingo.Run()
+	gobou.Register(&Task{})
 }
