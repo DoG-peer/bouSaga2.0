@@ -67,19 +67,17 @@ func (p *Task) Main(configFile string, s *[]gobou.Message) error {
 	if err != nil {
 		return err
 	}
-
+	*s = []gobou.Message{}
 	// find voice and  play the voice
 	for _, res := range data {
 		p.voiceMng.playAllMatch(res.body, 5*time.Second)
-		fmt.Println(res.body)
+		//*s = append(*s, gobou.Print(res.body))
 	}
 	nextNum := NextID(data, p.bbs.num)
 	p.config.Res = nextNum
 	p.bbs.MoveTo(nextNum)
-	if len(data) != 0 {
+	if len(*s) != 0 {
 		*s = append(*s, gobou.Notify("レスがありました"))
-	} else {
-		*s = append(*s, gobou.Notify(""))
 	}
 	return nil
 }
