@@ -71,7 +71,7 @@ func (p *Task) Main(configFile string, s *[]gobou.Message) error {
 	// find voice and  play the voice
 	for _, res := range data {
 		p.voiceMng.playAllMatch(res.body, 5*time.Second)
-		//*s = append(*s, gobou.Print(res.body))
+		*s = append(*s, gobou.Print(res.body))
 	}
 	nextNum := NextID(data, p.bbs.num)
 	p.config.Res = nextNum
